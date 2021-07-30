@@ -14,6 +14,9 @@ import androidx.core.content.ContextCompat
 // de passer des OnClickListeners sur les TextViews
 class QuizQuestionActivity : AppCompatActivity(), View.OnClickListener {
 
+    private var mUsername : String? = null
+    private var mCorrectAnswers : Int = 0
+    //
     private var mCurrentPosition : Int = 1
     private var mQuestionsList : ArrayList<Question>? = Constants.getQuestions()
     private var mSelectedOptionPosition : Int = 0
@@ -32,8 +35,11 @@ class QuizQuestionActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz_question)
+        //
+        mUsername = intent.getStringExtra(Constants.USERNAME)
+        //
         mQuestionsList = Constants.getQuestions()
-
+        //
         optionOne = findViewById<TextView>(R.id.tv_option_one)
         optionTwo = findViewById<TextView>(R.id.tv_option_two)
         optionThree = findViewById<TextView>(R.id.tv_option_three)
@@ -74,8 +80,6 @@ class QuizQuestionActivity : AppCompatActivity(), View.OnClickListener {
             questionImg.setImageResource(question.image)
         }
 
-        submitBtn!!.setText("SUBMIT")
-
         // 1
         if (question != null) {
             optionOne!!.text = question.optionOne
@@ -102,7 +106,10 @@ class QuizQuestionActivity : AppCompatActivity(), View.OnClickListener {
         options.add(2, optionThree!!)
         options.add(3, optionFour!!)
 
+        // La boucle passe par tous les boutons et leur applique le
+        // styling par défaut
         for (option in options){
+            // On remet la couleur du texte grise
             option.setTextColor(Color.parseColor("#7A8089"))
             // Sets style of text (italic, bold...)
             option.typeface = Typeface.DEFAULT
@@ -111,7 +118,7 @@ class QuizQuestionActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    // Ne pas oublier le paramètre v: View? de onClick où v = l'objet sélectionné (icin un TextView)
+    // Ne pas oublier le paramètre v: View? de onClick où v = l'objet sélectionné (ici un TextView)
     override fun onClick(v: View?) {
         // Quand l'ID de v
         when(v?.id){
@@ -147,7 +154,8 @@ class QuizQuestionActivity : AppCompatActivity(), View.OnClickListener {
         // 1. Reset all the buttons
         setDefaultOptionsView()
         //
-
+        val submitBtn = findViewById<Button>(R.id.btn_submit)
+        submitBtn.text = "SUBMIT"
         // *. Define TextViews for future
         // modifications
         mSelectedTextView = tv
@@ -190,6 +198,7 @@ class QuizQuestionActivity : AppCompatActivity(), View.OnClickListener {
         if (mSelectedOptionPosition == mCorrectAnswer){
             mCanAnswer = false
             mSelectedTextView!!.background = ContextCompat.getDrawable(this, R.drawable.correct_option_border_bg)
+            mCorrectAnswers += 1
             loadNextQuestion()
         }else if(mSelectedOptionPosition != mCorrectAnswer){
             mCanAnswer = false
@@ -213,12 +222,21 @@ class QuizQuestionActivity : AppCompatActivity(), View.OnClickListener {
                 mCurrentPosition <= mQuestionsList!!.size -> {
                     //... on charge la prochaine question
                     loadQuestion()
+                }else -> {
+                    val intent = Intent(this, EndScreen::class.java)
+                    intent.putExtra(Constants.USERNAME, mUsername)
+                    intent.putExtra(Constants.CORRECT_ANSWERS, mCorrectAnswers)
+                    intent.putExtra(Constants.TOTAL_QUESTIONS, mQuestionsList!!.size)
+                println(mUsername)
+                println(mQuestionsList!!.size)
+                    startActivity(intent)
                 }
             }
         }
         if(mCurrentPosition >= mQuestionsList!!.size){
             submitBtn!!.text = "FINISH QUIZ"
-            mSelectedOptionPosition = 9
+            mSelectedOptionPosition = 0
+
         }else{
             submitBtn!!.text = "GO TO NEXT QUESTION"
             // Si on a pas finit le quiz et qu'on clic sur submit

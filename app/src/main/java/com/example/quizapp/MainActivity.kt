@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
             }else{
                 // Charge nouvelle Activity (nouvelle fenêtre)
                 val intent = Intent(this, QuizQuestionActivity::class.java)
+                intent.putExtra(Constants.USERNAME, et_name.text.toString())
                 // On lance la nouvelle activity
                 startActivity(intent)
                 // Finish ferme l'activity pour qu'elle run pas en background
